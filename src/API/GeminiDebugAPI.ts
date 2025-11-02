@@ -1,6 +1,6 @@
 import axios from "axios";
 import { systemPrompt } from "../Promt/SystemPromt";
-import { useState } from "react";
+import { debugHelpers } from "../Promt/DebugData";
 
 const API_KEY = import.meta.env.VITE_GEMINI_DEBUG_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`;
@@ -126,10 +126,14 @@ export interface Message {
   timestamp?:string;
 }
 
-// Main function with reduced cognitive complexity
-export async function chatWithGemini(prompt: string): Promise<string> {
-  validateInputs(prompt);
-  const DataRequest = systemPrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
+// Main debug function with DebugData integration
+export async function debugWithGemini(userCode: string, userRequest: string): Promise<string> {
+  validateInputs(userRequest);
+  
+  // Sử dụng debugHelpers để tạo debug prompt hoàn chỉnh
+  const debugPrompt = debugHelpers.buildDebugPrompt(userCode, userRequest);
+  const chatHistory = sessionStorage.getItem("chat_history") || "[]";
+  const DataRequest = systemPrompt + "\n\nDEBUG DATA INTEGRATION:\n" + debugPrompt + "\n\nChat history: " + chatHistory;
 
   try {
     const body = createRequestBody(DataRequest);
@@ -161,5 +165,21 @@ export async function chatWithGemini(prompt: string): Promise<string> {
     if (error instanceof Error) throw error;
     throw new Error("Có lỗi không xác định xảy ra. Vui lòng thử lại.");
   }
+}
+
+// Wrapper function để giữ tương thích với interface hiện tại
+export async function chatWithGemini(prompt: string): Promise<string> {
+  // Phân tích prompt để tách code và request
+  const codeMatch = prompt.match(/```[\s\S]*?```/g);
+  const userCode = codeMatch ? codeMatch.join('\n') : '';
+  const userRequest = prompt.replace(/```[\s\S]*?```/g, '').trim();
+  
+  // Nếu có code trong prompt, sử dụng debug flow
+  if (userCode) {
+    return debugWithGemini(userCode, userRequest);
+  }
+  
+  // Nếu không có code, sử dụng debug flow với empty code
+  return debugWithGemini('', prompt);
 }
 

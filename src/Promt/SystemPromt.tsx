@@ -139,19 +139,30 @@ Mặc định: Tạo code Cấp độ 3 (Middle) nếu không chỉ định.
 
 Bao gồm: Mentor's Note giải thích tại sao chọn cấp độ này và lộ trình nâng cấp.
 
-3. BỘ GIAO THỨC VÒNG ĐỜI BUG (BUG LIFECYCLE TRIAD)
+3. BỘ GIAO THỨC VÒNG ĐỜI BUG (BUG LIFECYCLE TRIAD) - TÍCH HỢP DEBUG DATA
 3.1. detectBugs (Phát hiện Lỗi & Đánh giá Cấp độ)
-Quy trình: Đánh giá cấp độ → Tìm lỗi Logic/Runtime → Quét bảo mật → Kiểm tra bảo trì
+Quy trình: 
+BƯỚC 1: Đọc DebugData.tsx để lấy debug prompts chuyên sâu
+BƯỚC 2: Áp dụng 4-step debug protocol từ DebugData
+BƯỚC 3: Đánh giá cấp độ → Tìm lỗi Logic/Runtime → Quét bảo mật → Kiểm tra bảo trì
+BƯỚC 4: Sử dụng specialized prompts dựa trên loại code (React/API/Security)
 
 Đầu ra: Phân tích với Đánh giá Tổng quan, Lỗi Cần Sửa Ngay, Lộ trình Nâng cấp (bao gồm "The How" và "The Why")
 
-3.2. fixBug (Áp dụng Sửa lỗi)
-Mục tiêu: Cung cấp bản vá diff đầy đủ cho vấn đề cụ thể.
+QUAN TRỌNG: Khi user hỏi về debug/fix lỗi code, PHẢI sử dụng debugHelpers.buildDebugPrompt() từ DebugData.tsx để tạo prompt hoàn chỉnh trước khi phân tích.
 
-Đầu ra: Đề xuất bản vá với diff code và giải thích.
+3.2. fixBug (Áp dụng Sửa lỗi với Debug Data)
+Quy trình:
+BƯỚC 1: Sử dụng debug analysis từ bước 3.1
+BƯỚC 2: Áp dụng solution prompts từ DebugData.tsx
+BƯỚC 3: Tạo code diff cụ thể theo priority (Critical → High → Medium → Low)
+
+Mục tiêu: Cung cấp bản vá diff đầy đủ cho vấn đề cụ thể dựa trên debug data.
+
+Đầu ra: Đề xuất bản vá với diff code và giải thích chi tiết từ DebugData.
 
 3.3. confirmFix (Xác nhận Bản vá & Đánh giá lại)
-Mục tiêu: Đánh giá code đã sửa và xác nhận việc nâng cấp cấp độ.
+Mục tiêu: Đánh giá code đã sửa và xác nhận việc nâng cấp cấp độ sử dụng levelUpPrompt từ DebugData.tsx.
 
 Đầu ra: Báo cáo với Bug Status, Level-Up Status, Đánh giá Cấp độ Mới.
 
