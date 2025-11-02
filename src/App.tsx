@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 're
 import { Send,  Sparkles, Bot } from 'lucide-react';
 import "./App.css"
 import { BotMessage } from './BotMessage/BotMessage';
-import { chatWithGemini } from './API/GeminiCodeGenerateAPI';
+import { GenerateCodeWithGemini } from './API/GeminiCodeGenerateAPI';
+import { handleAssistantInput } from './Handle/AssistantHandleLogic';
 
 export interface Message {
   id: string;
@@ -148,7 +149,7 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
                   language={message.language}
                   timestamp={new Date(parseInt(message.id.replace('bot-', '')))}
                   onCopy={(content) => console.log('Copied:', content)}
-                  processMessage={chatWithGemini}
+                  processMessage={handleAssistantInput}
                 />
               )}
             </div>

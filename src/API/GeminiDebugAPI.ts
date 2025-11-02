@@ -1,5 +1,5 @@
 import axios from "axios";
-import { systemPrompt } from "../Promt/SystemPromt";
+import { CodeGeneratePrompt } from "../Promt/CodeGeneratePromt";
 import { useState } from "react";
 
 const API_KEY = import.meta.env.VITE_GEMINI_DEBUG_API_KEY;
@@ -129,7 +129,7 @@ export interface Message {
 // Main function with reduced cognitive complexity
 export async function chatWithGemini(prompt: string): Promise<string> {
   validateInputs(prompt);
-  const DataRequest = systemPrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
+  const DataRequest = CodeGeneratePrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
 
   try {
     const body = createRequestBody(DataRequest);
