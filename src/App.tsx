@@ -109,7 +109,7 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="absolute inset-0 bg-black/70 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-black/40 pointer-events-none z-0" />
 
       <header className="bg-black/20 backdrop-blur-2xl border-b border-white/10 px-4 py-3 relative z-10">
         <div className="max-w-5xl mx-auto flex items-center gap-3">
