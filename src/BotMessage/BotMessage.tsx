@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logError } from "../utils/errorLogger";
 
 export interface BotMessageProps {
   id: string;
@@ -41,8 +42,16 @@ export const BotMessage: React.FC<BotMessageProps> = ({
     } catch (e) {
       console.error('Processor error', e);
       if (!cancelled) {
-        setDisplayContent(e instanceof Error ? e.message : 'Có lỗi xảy ra khi xử lý.');
+        const errorMessage = e instanceof Error ? e.message : 'Có lỗi xảy ra khi xử lý.';
+        setDisplayContent(errorMessage);
         setIsLoading(false);
+        
+        // Log error vào error learning database
+        logError(e, content, {
+          requestType: 'assistant',
+        }, {
+          category: 'SYSTEM',
+        }).catch(err => console.error('Failed to log error:', err));
       }
     }
   };
