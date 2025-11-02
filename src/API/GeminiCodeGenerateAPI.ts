@@ -2,8 +2,8 @@ import axios from "axios";
 import { systemPrompt } from "../Promt/SystemPromt";
 import { useState } from "react";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`;
+const API_KEY = import.meta.env.VITE_GEMINI_CODE_GENERATE_API_KEY;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // Timeout configuration
 const TIMEOUT = 300000; //3p
