@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Send, Code, Sparkles, Bot } from 'lucide-react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { Send,  Sparkles, Bot } from 'lucide-react';
 import "./App.css"
 import { BotMessage } from './BotMessage/BotMessage';
 import { chatWithGemini } from './API/GeminiAPI';
 
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant'; 
   content: string;
   isCode?: boolean;
   language?: string;
+  timestamp?:string;
 }
 
 export type AICodeChatboxHandle = {
@@ -37,6 +38,13 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
     setMessages(prev => [...prev, message]);
   };
 
+  useEffect(() => {
+    const saved = sessionStorage.getItem("chat_history");
+    // if (saved) {
+    //   setMessages(JSON.parse(saved));
+    // }
+  }, []);
+
   useImperativeHandle(ref, () => ({
     send: async (text: string) => {
       await handleSendInternal(text);
@@ -54,20 +62,37 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
       content: value,
     };
 
-    setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
-    // Add assistant message with user's question
-    // BotMessage will process it through Gemini
-    const assistantMessage: Message = {
-      id: 'bot-' + Date.now(),
-      role: 'assistant',
-      content: value, // Pass user's question to BotMessage
-    };
-    
-    setMessages(prev => [...prev, assistantMessage]);
-    setIsTyping(false);
+    // 1️⃣ Thêm user message và lưu lại session
+    setMessages(prev => {
+      const updated = [...prev, userMessage];
+      sessionStorage.setItem("chat_history", JSON.stringify(updated));
+      return updated;
+    });
+
+    // 2️⃣ Gọi API Gemini
+    try {
+      const response = await chatWithGemini(value);
+
+      const assistantMessage: Message = {
+        id: 'bot-' + Date.now(),
+        role: 'assistant',
+        content: response, // Ghi nội dung trả về thật
+      };
+
+      // 3️⃣ Cập nhật messages và sessionStorage với phản hồi mới
+      setMessages(prev => {
+        const updated = [...prev, assistantMessage];
+        sessionStorage.setItem("chat_history", JSON.stringify(updated));
+        return updated;
+      });
+    } catch (e) {
+      console.error('Gemini error:', e);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSend = async () => {

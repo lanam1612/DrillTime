@@ -1,10 +1,12 @@
 import axios from "axios";
+import { systemPrompt } from "../Promt/SystemPromt";
+import { useState } from "react";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`;
 
 // Timeout configuration
-const TIMEOUT = 180000; //3p
+const TIMEOUT = 300000; //3p
 
 // Helper function to validate inputs
 function validateInputs(prompt: string): void {
@@ -115,30 +117,49 @@ function handleAxiosError(error: any): never {
   throw new Error("Có lỗi không xác định xảy ra. Vui lòng thử lại.");
 }
 
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant'; 
+  content: string;
+  isCode?: boolean;
+  language?: string;
+  timestamp?:string;
+}
+
 // Main function with reduced cognitive complexity
 export async function chatWithGemini(prompt: string): Promise<string> {
   validateInputs(prompt);
+  const DataRequest = systemPrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
 
   try {
-    const body = createRequestBody(prompt);
+    const body = createRequestBody(DataRequest);
 
     const response = await axios.post(API_URL, body, {
       timeout: TIMEOUT,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
+
+    // Lấy lịch sử chat hiện có trong sessionStorage
+    const chatHistory = sessionStorage.getItem("chat_history");
+    const messages: Message[] = chatHistory ? JSON.parse(chatHistory) : [];
+
+    // Tạo tin nhắn mới của trợ lý
+    const assistantMessage: Message = {
+      id: "bot-" + Date.now(),
+      role: "assistant",
+      content: extractResponseText(response),
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedMessages = [...messages, assistantMessage];
+    sessionStorage.setItem("chat_history", JSON.stringify(updatedMessages));
+
 
     return extractResponseText(response);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      handleAxiosError(error);
-    }
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
+    if (axios.isAxiosError(error)) handleAxiosError(error);
+    if (error instanceof Error) throw error;
     throw new Error("Có lỗi không xác định xảy ra. Vui lòng thử lại.");
   }
 }
+
