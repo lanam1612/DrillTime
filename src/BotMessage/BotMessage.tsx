@@ -21,32 +21,37 @@ export const BotMessage: React.FC<BotMessageProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+  let cancelled = false;
 
-    const runProcessor = async () => {
-      setIsLoading(true);
+  // Nếu không có processMessage (tức là load từ session)
+  if (!processMessage) {
+    setDisplayContent(content);
+    setIsLoading(false);
+    return;
+  }
 
-      try {
-        const response = await processMessage(content);
-        if (!cancelled) {
-          setDisplayContent(response);
-          setIsLoading(false);
-        }
-      } catch (e) {
-        console.error('Processor error', e);
-        if (!cancelled) {
-          setDisplayContent(e instanceof Error ? e.message : 'Có lỗi xảy ra khi xử lý.');
-          setIsLoading(false);
-        }
+  const runProcessor = async () => {
+    setIsLoading(true);
+    try {
+      const response = await processMessage(content);
+      if (!cancelled) {
+        setDisplayContent(response);
+        setIsLoading(false);
       }
-    };
+    } catch (e) {
+      console.error('Processor error', e);
+      if (!cancelled) {
+        setDisplayContent(e instanceof Error ? e.message : 'Có lỗi xảy ra khi xử lý.');
+        setIsLoading(false);
+      }
+    }
+  };
 
-    runProcessor();
+  runProcessor();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [content, processMessage]);
+  return () => { cancelled = true; };
+}, [content, processMessage]);
+
 
   const handleCopy = async (text: string, messageId: string) => {
     try {
