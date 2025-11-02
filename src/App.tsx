@@ -62,37 +62,25 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
       content: value,
     };
 
-    setInput('');
-    setIsTyping(true);
-
-    // 1️⃣ Thêm user message và lưu lại session
+    // Cập nhật cả sessionStorage ngay khi thêm message mới
     setMessages(prev => {
       const updated = [...prev, userMessage];
       sessionStorage.setItem("chat_history", JSON.stringify(updated));
       return updated;
     });
 
-    // 2️⃣ Gọi API Gemini
-    try {
-      const response = await chatWithGemini(value);
+    setInput('');
+    setIsTyping(true);
 
-      const assistantMessage: Message = {
-        id: 'bot-' + Date.now(),
-        role: 'assistant',
-        content: response, // Ghi nội dung trả về thật
-      };
-
-      // 3️⃣ Cập nhật messages và sessionStorage với phản hồi mới
-      setMessages(prev => {
-        const updated = [...prev, assistantMessage];
-        sessionStorage.setItem("chat_history", JSON.stringify(updated));
-        return updated;
-      });
-    } catch (e) {
-      console.error('Gemini error:', e);
-    } finally {
-      setIsTyping(false);
-    }
+    const assistantMessage: Message = {
+      id: 'bot-' + Date.now(),
+      role: 'assistant',
+      content: value, 
+    };
+    
+    
+    setMessages(prev => [...prev, assistantMessage]);
+    setIsTyping(false);
   };
 
   const handleSend = async () => {
@@ -109,7 +97,7 @@ const AICodeChatbox = forwardRef<AICodeChatboxHandle, Props>(({ onSend, placehol
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="absolute inset-0 bg-black/40 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-black/50 pointer-events-none z-0" />
 
       <header className="bg-black/20 backdrop-blur-2xl border-b border-white/10 px-4 py-3 relative z-10">
         <div className="max-w-5xl mx-auto flex items-center gap-3">
