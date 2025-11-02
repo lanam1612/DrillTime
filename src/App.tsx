@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 're
 import { Send,  Sparkles, Bot } from 'lucide-react';
 import "./App.css"
 import { BotMessage } from './BotMessage/BotMessage';
-import { chatWithGemini } from './API/GeminiAPI';
+import { chatWithGemini } from './API/GeminiCodeGenerateAPI';
 
 export interface Message {
   id: string;
