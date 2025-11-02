@@ -1,9 +1,9 @@
 import axios from "axios";
-import { systemPrompt } from "../Promt/SystemPromt";
+import { CodeGeneratePrompt } from "../Promt/CodeGeneratePromt";
 import { useState } from "react";
 
 const API_KEY = import.meta.env.VITE_GEMINI_CODE_GENERATE_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`;
 
 // Timeout configuration
 const TIMEOUT = 300000; //3p
@@ -127,9 +127,9 @@ export interface Message {
 }
 
 // Main function with reduced cognitive complexity
-export async function chatWithGemini(prompt: string): Promise<string> {
+export async function GenerateCodeWithGemini(prompt: string): Promise<string> {
   validateInputs(prompt);
-  const DataRequest = systemPrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
+  const DataRequest = CodeGeneratePrompt + "   \n Chat history: " + JSON.parse(sessionStorage.getItem("chat_history") || "") + "User request:" + prompt;
 
   try {
     const body = createRequestBody(DataRequest);
